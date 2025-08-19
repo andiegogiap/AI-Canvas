@@ -7,11 +7,12 @@ interface NodeProps {
   node: NodeType;
   onDragStart: (e: React.MouseEvent<HTMLDivElement>) => void;
   updateNodeData: (nodeId: string, newData: Record<string, any>) => void;
-  onPortClick: (nodeId: string, port: Port, isOutput: boolean) => void;
+  onOutputPortMouseDown: (nodeId: string, portId: string) => void;
+  onInputPortMouseUp: (nodeId: string, portId: string) => void;
   connecting: ConnectingInfo | null;
 }
 
-const Node: React.FC<NodeProps> = ({ node, onDragStart, updateNodeData, onPortClick, connecting }) => {
+const Node: React.FC<NodeProps> = ({ node, onDragStart, updateNodeData, onOutputPortMouseDown, onInputPortMouseUp, connecting }) => {
   const nodeInfo = NODE_TYPES[node.type];
   if (!nodeInfo) return null;
 
@@ -113,12 +114,15 @@ const Node: React.FC<NodeProps> = ({ node, onDragStart, updateNodeData, onPortCl
       </div>
       
       {nodeInfo.inputs.map((port, i) => (
-        <div key={port.id} onClick={() => onPortClick(node.id, port, false)}
+        <div key={port.id} 
+          onMouseUp={(e) => { e.stopPropagation(); onInputPortMouseUp(node.id, port.id); }}
+          onMouseDown={(e) => e.stopPropagation()}
           className={`absolute w-4 h-4 bg-gray-700 border-2 rounded-full -left-2 cursor-crosshair transition-colors ${!!connecting ? 'border-fuchsia-500 hover:bg-fuchsia-400' : 'border-gray-500 hover:bg-gray-400'}`}
           style={{ top: `${95 + i * 30}px` }} role="button" aria-label={`Input port: ${port.name}`} title={`Input: ${port.name}`} />
       ))}
       {nodeInfo.outputs.map((port, i) => (
-        <div key={port.id} onClick={() => onPortClick(node.id, port, true)}
+        <div key={port.id} 
+          onMouseDown={(e) => { e.stopPropagation(); onOutputPortMouseDown(node.id, port.id); }}
           className={`absolute w-4 h-4 bg-gray-700 border-2 rounded-full -right-2 cursor-crosshair transition-colors ${connecting?.startNodeId === node.id ? 'bg-fuchsia-500 border-fuchsia-400' : 'border-gray-500 hover:bg-gray-400'}`}
           style={{ top: `${95 + i * 30}px` }} role="button" aria-label={`Output port: ${port.name}`} title={`Output: ${port.name}`} />
       ))}

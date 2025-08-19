@@ -77,12 +77,6 @@ export default function App() {
       e.preventDefault();
       isResizing.current = true;
   };
-  
-  const handleCanvasClick = (e: React.MouseEvent) => {
-      if (e.target === canvasRef.current) {
-          setConnecting(null);
-      }
-  }
 
   const addNode = (nodeType: string, x: number, y: number) => {
     const defaultData = NODE_TYPES[nodeType]?.defaultData;
@@ -119,24 +113,24 @@ export default function App() {
     );
   }, []);
 
-  const handlePortClick = (nodeId: string, port: Port, isOutput: boolean) => {
-    if (isOutput) {
-      setConnecting({ startNodeId: nodeId, startPortId: port.id });
-    } else {
-      if (connecting && connecting.startNodeId !== nodeId) {
-        const newConnection: Connection = {
-            id: `conn-${connecting.startNodeId}-${nodeId}-${port.id}`,
-            startNodeId: connecting.startNodeId,
-            startPortId: connecting.startPortId,
-            endNodeId: nodeId,
-            endPortId: port.id,
-        };
-        // Prevent connecting to an already connected input port
-        if (!connections.some(c => c.endNodeId === newConnection.endNodeId && c.endPortId === newConnection.endPortId)) {
-            setConnections((prev) => [...prev, newConnection]);
-        }
-        setConnecting(null);
+  const handleOutputPortMouseDown = (nodeId: string, portId: string) => {
+    setConnecting({ startNodeId: nodeId, startPortId: portId });
+  };
+
+  const handleInputPortMouseUp = (nodeId: string, portId: string) => {
+    if (connecting && connecting.startNodeId !== nodeId) {
+      const newConnection: Connection = {
+          id: `conn-${connecting.startNodeId}-${nodeId}-${portId}`,
+          startNodeId: connecting.startNodeId,
+          startPortId: connecting.startPortId,
+          endNodeId: nodeId,
+          endPortId: portId,
+      };
+      // Prevent connecting to an already connected input port
+      if (!connections.some(c => c.endNodeId === newConnection.endNodeId && c.endPortId === newConnection.endPortId)) {
+          setConnections((prev) => [...prev, newConnection]);
       }
+      // The global mouse up handler will fire next and clear the connecting state.
     }
   };
   
@@ -310,7 +304,7 @@ export default function App() {
           onLoadTemplate={loadTemplate}
           onOpenSettings={() => setIsSettingsPanelOpen(true)}
         />
-        <div ref={canvasRef} className="flex-1 bg-gray-800 relative overflow-auto" onClick={handleCanvasClick} onDrop={handleDrop} onDragOver={handleDragOver}
+        <div ref={canvasRef} className="flex-1 bg-gray-800 relative overflow-auto" onDrop={handleDrop} onDragOver={handleDragOver}
           style={{ backgroundImage: 'radial-gradient(#3f3f46 1px, transparent 0)', backgroundSize: `${SNAP_GRID_SIZE}px ${SNAP_GRID_SIZE}px` }}
           aria-label="Orchestration Canvas">
           <svg className="absolute w-full h-full pointer-events-none" aria-hidden="true">
@@ -321,7 +315,8 @@ export default function App() {
             <Node key={node.id} node={node} 
                 onDragStart={(e) => handleNodeDragStart(e, node)}
                 updateNodeData={updateNodeData} 
-                onPortClick={handlePortClick} 
+                onOutputPortMouseDown={handleOutputPortMouseDown}
+                onInputPortMouseUp={handleInputPortMouseUp}
                 connecting={connecting}
             />
           ))}

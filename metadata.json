@@ -1,5 +1,5 @@
 {
-  "name": "Copy of AI Orchestration Canvas",
+  "name": "1AIOC-AI Orchestration Canvas",
   "description": "A visual, node-based interface for designing, prototyping, and executing complex AI workflows. Drag, drop, and connect nodes representing user prompts, Gemini models, formatters, and outputs to build and run sophisticated AI-powered orchestrations.",
   "requestFramePermissions": [],
   "prompt": ""
