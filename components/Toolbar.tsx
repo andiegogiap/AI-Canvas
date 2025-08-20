@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Trash2, ChevronDown, Settings } from 'lucide-react';
-import type { Template } from '../templates';
+import { Play, Trash2, ChevronDown, Settings, Save } from 'lucide-react';
+import type { Template } from '../types';
 
 interface ToolbarProps {
   runOrchestration: () => void;
@@ -9,9 +9,10 @@ interface ToolbarProps {
   templates: Template[];
   onLoadTemplate: (template: Template) => void;
   onOpenSettings: () => void;
+  onSaveTemplate: () => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ runOrchestration, clearCanvas, isProcessing, templates, onLoadTemplate, onOpenSettings }) => {
+const Toolbar: React.FC<ToolbarProps> = ({ runOrchestration, clearCanvas, isProcessing, templates, onLoadTemplate, onOpenSettings, onSaveTemplate }) => {
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +77,11 @@ const Toolbar: React.FC<ToolbarProps> = ({ runOrchestration, clearCanvas, isProc
               <Play size={16} /> Run
             </>
           )}
+        </button>
+        <button onClick={onSaveTemplate} aria-label="Save as Template" title="Save as Template"
+          disabled={isProcessing}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-semibold disabled:bg-gray-500 disabled:cursor-not-allowed">
+          <Save size={16} /> Save
         </button>
         <button onClick={clearCanvas} aria-label="Clear Canvas" title="Clear Canvas"
           disabled={isProcessing}

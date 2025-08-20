@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { BrainCircuit, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { NODE_TYPES, NODE_CATEGORIES } from '../constants';
+import { NODE_TYPES, NODE_CATEGORIES, CATEGORY_ICONS } from '../constants';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -26,18 +26,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, width, onToggleCollapse 
             <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
                    <div className="p-2 bg-gradient-to-br from-purple-600 to-sky-600 rounded-lg text-white"><BrainCircuit size={24} /></div>
-                   <h1 className="text-xl font-bold text-slate-100">AI Orchestration</h1>
+                   <h1 className="text-xl font-bold text-slate-100">AgentWeaver</h1>
                 </div>
             </div>
             <div className="flex-shrink-0 border-b border-gray-700">
                 <nav className="flex -mb-px">
-                    {NODE_CATEGORIES.map(cat => (
-                        <button key={cat} onClick={() => setActiveTab(cat)}
-                            className={`flex-1 p-3 text-sm font-semibold transition-colors ${activeTab === cat ? 'border-b-2 border-purple-500 text-purple-400' : 'text-slate-400 hover:bg-gray-800'}`}
-                            aria-current={activeTab === cat ? 'page' : undefined}>
-                            {cat}
-                        </button>
-                    ))}
+                    {NODE_CATEGORIES.map(cat => {
+                        const Icon = CATEGORY_ICONS[cat];
+                        return (
+                            <button key={cat} onClick={() => setActiveTab(cat)}
+                                className={`flex-1 p-3 flex justify-center items-center transition-colors ${activeTab === cat ? 'border-b-2 border-purple-500 text-purple-400' : 'text-slate-400 hover:bg-gray-800'}`}
+                                aria-current={activeTab === cat ? 'page' : undefined}
+                                title={cat}
+                                aria-label={cat}
+                            >
+                                {Icon && <Icon size={20} />}
+                            </button>
+                        );
+                    })}
                 </nav>
             </div>
             <div className="flex-1 p-4 overflow-y-auto">

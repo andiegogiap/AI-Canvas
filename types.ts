@@ -1,4 +1,3 @@
-
 import type { LucideIcon } from 'lucide-react';
 
 export interface Port {
@@ -37,4 +36,11 @@ export interface Connection {
 export interface ConnectingInfo {
   startNodeId: string;
   startPortId: string;
+}
+
+export interface Template {
+  name: string;
+  description: string;
+  nodes: Node[];
+  connections: Connection[];
 }

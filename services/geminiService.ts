@@ -1,4 +1,4 @@
-import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse } from '@google/genai';
+import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse, Type } from '@google/genai';
 
 if (!process.env.API_KEY) {
   console.error("API_KEY environment variable not set. Gemini node will not work.");
@@ -67,6 +67,45 @@ export const callGeminiAPI = async (prompt: string, systemContext?: string, para
     return "An unknown error occurred during the API call.";
   }
 };
+
+export const callGeminiForArticle = async (topic: string, globalInstructions?: GlobalInstructions): Promise<string> => {
+  if (!process.env.API_KEY) {
+    throw new Error("Gemini API key is not configured. Please set the API_KEY environment variable.");
+  }
+
+  const systemInstruction = [
+    globalInstructions?.ai,
+    globalInstructions?.system,
+    'You are an expert blog post writer. Generate a compelling and well-structured blog post based on the topic provided. The output must be a JSON object with a "title" and a "content" field. The content should be in Markdown format.'
+  ].filter(Boolean).join('\n\n');
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `Generate a blog post about: ${topic}`,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING, description: 'The title of the blog post.' },
+            content: { type: Type.STRING, description: 'The full content of the blog post in Markdown format.' }
+          },
+          propertyOrdering: ["title", "content"],
+        }
+      }
+    });
+    return response.text; // This will be the JSON string
+  } catch (error) {
+    console.error("Gemini API call for article failed:", error);
+    if (error instanceof Error) {
+        throw new Error(`Error generating article: ${error.message}`);
+    }
+    throw new Error("An unknown error occurred during article generation.");
+  }
+};
+
 
 export const generateImageAPI = async (prompt: string): Promise<string> => {
   if (!process.env.API_KEY) {
