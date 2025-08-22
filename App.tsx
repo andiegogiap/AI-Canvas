@@ -105,7 +105,10 @@ export default function App() {
   const getCanvasRelativePosition = useCallback((event: MouseEvent | React.MouseEvent) => {
     if (canvasRef.current) {
       const rect = canvasRef.current.getBoundingClientRect();
-      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      return { 
+        x: event.clientX - rect.left + canvasRef.current.scrollLeft, 
+        y: event.clientY - rect.top + canvasRef.current.scrollTop 
+      };
     }
     return { x: 0, y: 0 };
   }, []);

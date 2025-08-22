@@ -13,21 +13,28 @@ export const TEMPLATES: Template[] = [
     name: 'WordPress Auto-Poster',
     description: 'A full workflow to automatically generate and post articles to WordPress.',
     nodes: [
-      { id: 'wp-1', type: 'TOPIC_CHOOSER', x: 40, y: 180, data: { ...NODE_TYPES.TOPIC_CHOOSER.defaultData, topics: 'The Impact of AI on Modern Art\nQuantum Computing Explained Simply\nBenefits of a Mediterranean Diet\nTop 5 JavaScript Frameworks in 2024' }},
-      { id: 'wp-2', type: 'ARTICLE_GENERATOR', x: 400, y: 180, data: { ...NODE_TYPES.ARTICLE_GENERATOR.defaultData }},
-      { id: 'wp-md-converter', type: 'MARKDOWN_TO_HTML', x: 760, y: 180, data: { ...NODE_TYPES.MARKDOWN_TO_HTML.defaultData }},
-      { id: 'wp-3', type: 'WP_POST_FORMATTER', x: 1120, y: 180, data: { ...NODE_TYPES.WP_POST_FORMATTER.defaultData }},
-      { id: 'wp-4', type: 'API_REQUEST', x: 1480, y: 180, data: { ...NODE_TYPES.API_REQUEST.defaultData, method: 'POST', url: 'https://YOUR_WORDPRESS_SITE/wp-json/wp/v2/posts', headers: '{\n  "Content-Type": "application/json",\n  "Authorization": "Bearer YOUR_JWT_TOKEN"\n}' }},
-      { id: 'wp-5', type: 'LOG', x: 1840, y: 180, data: { ...NODE_TYPES.LOG.defaultData }},
-      { id: 'wp-6', type: 'SCHEDULER', x: 40, y: 40, data: { ...NODE_TYPES.SCHEDULER.defaultData, interval: 3600 }}
+      // Main flow nodes, arranged for clarity
+      { id: 'wp-topic-chooser', type: 'TOPIC_CHOOSER', x: 40, y: 280, data: { ...NODE_TYPES.TOPIC_CHOOSER.defaultData, topics: 'The Impact of AI on Modern Art\nQuantum Computing Explained Simply\nBenefits of a Mediterranean Diet\nTop 5 JavaScript Frameworks in 2024' }},
+      
+      // Forked flow for title and content processing
+      { id: 'wp-article-generator', type: 'ARTICLE_GENERATOR', x: 400, y: 150, data: { ...NODE_TYPES.ARTICLE_GENERATOR.defaultData }},
+      { id: 'wp-md-converter', type: 'MARKDOWN_TO_HTML', x: 400, y: 410, data: { ...NODE_TYPES.MARKDOWN_TO_HTML.defaultData }},
+      
+      // Join point and final steps
+      { id: 'wp-post-formatter', type: 'WP_POST_FORMATTER', x: 800, y: 280, data: { ...NODE_TYPES.WP_POST_FORMATTER.defaultData }},
+      { id: 'wp-api-request', type: 'API_REQUEST', x: 1200, y: 280, data: { ...NODE_TYPES.API_REQUEST.defaultData, method: 'POST', url: 'https://YOUR_WORDPRESS_SITE/wp-json/wp/v2/posts', headers: '{\n  "Content-Type": "application/json",\n  "Authorization": "Bearer YOUR_JWT_TOKEN"\n}' }},
+      { id: 'wp-log-result', type: 'LOG', x: 1600, y: 280, data: { ...NODE_TYPES.LOG.defaultData }},
+      
+      // Scheduler, placed out of the way
+      { id: 'wp-scheduler', type: 'SCHEDULER', x: 40, y: 40, data: { ...NODE_TYPES.SCHEDULER.defaultData, interval: 3600 }}
     ],
     connections: [
-      { id: 'conn-wp-1-2', startNodeId: 'wp-1', startPortId: 'out', endNodeId: 'wp-2', endPortId: 'topic' },
-      { id: 'conn-wp-2a-3', startNodeId: 'wp-2', startPortId: 'title', endNodeId: 'wp-3', endPortId: 'title' },
-      { id: 'conn-wp-2-md', startNodeId: 'wp-2', startPortId: 'content', endNodeId: 'wp-md-converter', endPortId: 'in' },
-      { id: 'conn-md-3', startNodeId: 'wp-md-converter', startPortId: 'out', endNodeId: 'wp-3', endPortId: 'content' },
-      { id: 'conn-wp-3-4', startNodeId: 'wp-3', startPortId: 'out', endNodeId: 'wp-4', endPortId: 'body' },
-      { id: 'conn-wp-4-5', startNodeId: 'wp-4', startPortId: 'response', endNodeId: 'wp-5', endPortId: 'in' },
+      { id: 'conn-wp-1', startNodeId: 'wp-topic-chooser', startPortId: 'out', endNodeId: 'wp-article-generator', endPortId: 'topic' },
+      { id: 'conn-wp-2', startNodeId: 'wp-article-generator', startPortId: 'title', endNodeId: 'wp-post-formatter', endPortId: 'title' },
+      { id: 'conn-wp-3', startNodeId: 'wp-article-generator', startPortId: 'content', endNodeId: 'wp-md-converter', endPortId: 'in' },
+      { id: 'conn-wp-4', startNodeId: 'wp-md-converter', startPortId: 'out', endNodeId: 'wp-post-formatter', endPortId: 'content' },
+      { id: 'conn-wp-5', startNodeId: 'wp-post-formatter', startPortId: 'out', endNodeId: 'wp-api-request', endPortId: 'body' },
+      { id: 'conn-wp-6', startNodeId: 'wp-api-request', startPortId: 'response', endNodeId: 'wp-log-result', endPortId: 'in' },
     ]
   },
   {
